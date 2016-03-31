@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+
+# Go to where the script is executing
+cd "${0%/*}"
+. ./aws-lib
+
+template="$(pwd)/cloudformation.json"
+
+if [[ -e "$template" ]]; then
+    logInfo "Removing a previous template"
+    rm "$template"
+fi
+
+logInfo "Creating new template"
+./build-json.js > "$template"
+
+logInfo "Validating template"
+aws cloudformation validate-template --region us-east-1 --template-body "file://$template"
+
+if [[ "$1" == "--recreate" ]]; then
+    logInfo "Deleting stack"
+    aws cloudformation delete-stack --stack-name opentoken-app --region us-east-1 || :
+
+    logInfo "Creating stack"
+    aws cloudformation create-stack --stack-name opentoken-app --region us-east-1 --template-body "file://$template"
+else
+    logInfo "Updating stack"
+    aws cloudformation update-stack --stack-name opentoken-app --region us-east-1 --template-body "file://$template"
+fi
+
+logInfo "Success"
