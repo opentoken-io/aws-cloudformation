@@ -1,0 +1,8 @@
+Type: AWS::ElasticBeanstalk::ApplicationVersion
+Properties:
+    ApplicationName:
+        Ref: openTokenApplication
+    Description: OpenToken.io
+    SourceBundle:
+        S3Bucket: opentoken-io-app
+        S3Key: application/YYYY-MM-DD_HH:MM:SS/archive.zip

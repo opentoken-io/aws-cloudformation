@@ -1,0 +1,9 @@
+Type: AWS::ElasticBeanstalk::Environment
+Properties:
+    ApplicationName:
+        Ref: openTokenApplication
+    Description: OpenToken.io Environment
+    TemplateName:
+        Ref: openTokenConfigurationTemplate
+    VersionLabel:
+        Ref: openTokenApplicationVersion

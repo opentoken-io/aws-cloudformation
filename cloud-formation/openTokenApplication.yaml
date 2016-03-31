@@ -1,0 +1,3 @@
+Type: AWS::ElasticBeanstalk::Application
+Properties:
+    Description: OpenToken.io API
