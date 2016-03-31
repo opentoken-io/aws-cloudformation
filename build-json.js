@@ -43,7 +43,7 @@ glob(path.resolve(dir, "*.yaml")).then((paths) => {
     var str;
 
     str = JSON.stringify(result, null, 4);
-    str = str.replace("YYYY-MM-DD_HH:MM:SS", "2016-03-31_18:49:17");
+    str = str.replace("YYYY-MM-DD_HH:MM:SS", "2016-03-31_19:46:16");
     console.log(str);
 }, (err) => {
     console.error(err);
