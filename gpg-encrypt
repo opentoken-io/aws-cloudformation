@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+recipients=(fidian@rumkin.com tetreault.chris.cws@gmail.com)
+gpgCmd=(gpg --encrypt)
+
+for r in "${recipients[@]}"; do
+    gpgCmd+=(--recipient "$r")
+done
+
+set -x
+"${gpgCmd[@]}" "$@"

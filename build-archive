@@ -1,0 +1,60 @@
+#!/usr/bin/env bash
+
+# Go to where the script is executing
+cd "${0%/*}"
+. ./aws-lib
+
+archive="$(pwd)/archive.zip"
+buildDir="$(pwd)/build"
+buildDate="$(date -u --rfc-3339=seconds | cut -d + -f 1 | tr ' ' _)"
+
+requireCommand aws
+requireCommand git
+requireCommand gpg
+requireCommand npm
+requireCommand zip
+
+logInfo "Starting build: $buildDate"
+
+if [[ -e "$buildDir" ]]; then
+    logInfo "Cleaning up leftover build/ directory"
+    rm -rf build
+fi
+
+if [[ -f "$archive" ]]; then
+    logInfo "Removing leftover archive file"
+    rm "$archive"
+fi
+
+logInfo "Creating new build directory"
+mkdir "$buildDir"
+
+(
+    logInfo "Checking out repository"
+    git clone https://github.com/opentoken-io/opentoken.git "$buildDir"
+
+    cd "$buildDir"
+
+    logInfo "Removing .git"
+    rm -rf .git
+
+    logInfo "Installing node modules"
+    npm install
+
+    logInfo "Overriding config"
+    cp ../config.json .
+
+    for F in certificate.crt private.key; do
+        logInfo "Installing SSL file: $F"
+        gpg --decrypt ../"${F}.gpg" > "$F"
+    done
+
+    logInfo "Building archive"
+    zip "$archive" -r * .[^.]*
+)
+
+logInfo "Removing build directory"
+rm -rf "$buildDir"
+
+logInfo "Uploading to the bucket"
+s3cmd put --server-side-encryption --ssl "$archive" "s3://opentoken-io-app/application/${buildDate}/"

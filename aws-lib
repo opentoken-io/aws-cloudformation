@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+logInfo() {
+    echo "*** $*"
+}
+
+requireCommand() {
+    if ! hash "$1"; then
+        echo "Missing command: $1" >&2
+        exit 2
+    fi
+}
+
+# Enable strict mode
+set -eEu -o pipefail
+
+if [[ -z "${AWS_ACCESS_KEY_ID-}" ]] || [[ -z "${AWS_SECRET_ACCESS_KEY-}" ]]; then
+    echo "You must have both AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY" >&2
+    echo "set in your environment." >&2
+    exit 1
+fi
