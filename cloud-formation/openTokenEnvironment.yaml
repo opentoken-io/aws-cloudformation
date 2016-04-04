@@ -1,8 +1,61 @@
+# http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-beanstalk-environment.html
 Type: AWS::ElasticBeanstalk::Environment
 Properties:
     ApplicationName:
         Ref: openTokenApplication
     Description: OpenToken.io Environment
+    # http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-beanstalk-option-settings.html
+    # http://docs.aws.amazon.com/elasticbeanstalk/latest/api/API_ConfigurationOptionSetting.html
+    OptionSettings:
+        -
+            Namespace: aws:autoscaling:asg
+            OptionName: Availability Zones
+            Value: Any 2
+        # -
+        #     Namespace: aws:autoscaling:launchconfiguration
+        #     OptionName: IamInstanceProfile
+        #     Value:
+        #         Ref: openTokenInstanceProfile
+        -
+            Namespace: aws:autoscaling:launchconfiguration
+            OptionName: SecurityGroups
+            Value:
+                Ref: openTokenSecurityGroupInstance
+        -
+            Namespace: aws:autoscaling:updatepolicy:rollingupdate
+            OptionName: RollingUpdateEnabled
+            Value: true
+        -
+            Namespace: aws:elb:loadbalancer
+            OptionName: SecurityGroups
+            Value:
+                "Fn::GetAtt":
+                    - openTokenSecurityGroupLoadBalancer
+                    - GroupId
+        -
+            Namespace: aws:elb:listener:80
+            OptionName: ListenerProtocol
+            Value: TCP
+        -
+            Namespace: aws:elb:listener:80
+            OptionName: InstancePort
+            Value: 8080
+        -
+            Namespace: aws:elb:listener:443
+            OptionName: ListenerProtocol
+            Value: TCP
+        -
+            Namespace: aws:elb:listener:443
+            OptionName: InstancePort
+            Value: 8443
+        -
+            Namespace: aws:elb:policies:EnableProxyProtocol
+            OptionName: InstancePorts
+            Value: :all
+        -
+            Namespace: aws:elb:policies:EnableProxyProtocol
+            OptionName: ProxyProtocol
+            Value: true
     TemplateName:
         Ref: openTokenConfigurationTemplate
     VersionLabel:

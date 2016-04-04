@@ -1,33 +1,58 @@
 #!/usr/bin/env bash
 
+buildTemplate() {
+    if [[ -e "$template" ]]; then
+        logInfo "Removing a previous template"
+        rm "$template"
+    fi
+
+    logInfo "Creating new template"
+    ./build-json.js > "$template"
+
+    logInfo "Validating template"
+    aws cloudformation validate-template --region us-east-1 --template-body "file://$template"
+}
+
+callAws() {
+    aws cloudformation "$1" --stack-name opentoken-app --region us-east-1 --template-body "file://$template" --capabilities CAPABILITY_IAM
+}
+
+# Strict mode
+set -eEu -o pipefail
+
 # Go to where the script is executing
 cd "${0%/*}"
 . ./aws-lib
 
-template="$(pwd)/cloudformation.json"
-
 requireCommand aws
 
-if [[ -e "$template" ]]; then
-    logInfo "Removing a previous template"
-    rm "$template"
-fi
+template="$(pwd)/cloudformation.json"
 
-logInfo "Creating new template"
-./build-json.js > "$template"
+case "${1-}" in
+    create)
+        buildTemplate
+        logInfo "Creating stack"
+        callAws create-stack
+        ;;
 
-logInfo "Validating template"
-aws cloudformation validate-template --region us-east-1 --template-body "file://$template"
+    delete)
+        logInfo "Deleting stack"
+        aws cloudformation delete-stack --stack-name opentoken-app --region us-east-1
+        ;;
 
-if [[ "$1" == "--recreate" ]]; then
-    logInfo "Deleting stack"
-    aws cloudformation delete-stack --stack-name opentoken-app --region us-east-1 || :
+    update)
+        buildTemplate
+        logInfo "Updating stack"
+        callAws update-stack
+        ;;
 
-    logInfo "Creating stack"
-    aws cloudformation create-stack --stack-name opentoken-app --region us-east-1 --template-body "file://$template"
-else
-    logInfo "Updating stack"
-    aws cloudformation update-stack --stack-name opentoken-app --region us-east-1 --template-body "file://$template"
-fi
+    *)
+        echo "Specify an action: create, delete or update"
+        echo ""
+        echo "Example:"
+        echo ""
+        echo "$0 create"
+        exit 1
+esac
 
 logInfo "Success"

@@ -1,0 +1,22 @@
+# http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-ec2-security-group.html
+Type: AWS::EC2::SecurityGroup
+Properties:
+    GroupDescription: Traffic into and out of the API instance
+    # http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-ec2-security-group-rule.html
+    SecurityGroupIngress:
+        -
+            IpProtocol: tcp
+            FromPort: 8080
+            SourceSecurityGroupId:
+                "Fn::GetAtt":
+                    - openTokenSecurityGroupLoadBalancer
+                    - GroupId
+            ToPort: 8080
+        -
+            IpProtocol: tcp
+            FromPort: 8443
+            SourceSecurityGroupId:
+                "Fn::GetAtt":
+                    - openTokenSecurityGroupLoadBalancer
+                    - GroupId
+            ToPort: 8443

@@ -1,0 +1,16 @@
+# http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-ec2-security-group.html
+Type: AWS::EC2::SecurityGroup
+Properties:
+    GroupDescription: Traffic into and out of the ELB
+    # http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-ec2-security-group-rule.html
+    SecurityGroupIngress:
+        -
+            CidrIp: 0.0.0.0/0
+            IpProtocol: tcp
+            FromPort: 80
+            ToPort: 80
+        -
+            CidrIp: 0.0.0.0/0
+            IpProtocol: tcp
+            FromPort: 443
+            ToPort: 443
