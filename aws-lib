@@ -5,7 +5,7 @@ logInfo() {
 }
 
 requireCommand() {
-    if ! hash "$1"; then
+    if ! hash "$1" 2> /dev/null; then
         echo "Missing command: $1" >&2
         exit 2
     fi
